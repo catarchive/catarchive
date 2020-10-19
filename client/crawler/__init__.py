@@ -5,15 +5,15 @@ import threading
 from . import web as w
 
 local_explored = set([])
-images = set([])
+local_explored_images = set([])
 
 def attempt(link):
-    """Attempt to crawl a single webpage. Any other links are returned, 
-    and the images are printed."""
+    """Attempt to crawl a single webpage. 
+    Any resulting links and images are returned."""
 
     # Ensure the page hasn't already been explored:
     if link in local_explored:
-        return []
+        return ([], [])
 
     # Instantiate the page class:
     p = w.Page(link)
@@ -23,7 +23,7 @@ def attempt(link):
         p.get()
     # Return if there was a connect error or if the request timed out:
     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-        return []
+        return ([], [])
 
     # Sleep for the appropriate time and reattempt if the status code was 429:
     if p.response.status_code == 429:
@@ -37,16 +37,17 @@ def attempt(link):
     # Return if the status code was not 200:
     if p.response.status_code != 200:
         print('bad status code', p.response.status_code, link)
-        return []
+        return ([], [])
 
     # The explore method will set p.links and p.images.
     p.explore()
 
-    # Print out the images:
+    # Filter the images:
+    valid_images = []
     for image in p.images:
-        if image not in local_explored:
-            print(image)
-            images.add(image)
+        if image not in local_explored_images:
+            valid_images.append(image)
+            local_explored_images.add(image)
 
     # Return any links to crawl.
-    return p.links
+    return (p.links, valid_images)
