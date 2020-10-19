@@ -30,7 +30,7 @@ class Page:
         images = [image.get('src') for image in page_data.find_all('img')]
 
         try:
-            self.robots = RobotFileParser(url=self.url.scheme+'://'+urlparse(seed_url).netloc+'/robots.txt')
+            self.robots = RobotFileParser(url=self.url.scheme+'://'+self.url.netloc+'/robots.txt')
             self.robots.read()
         except:
             self.robots = AlwaysRobot()
@@ -61,7 +61,7 @@ class Page:
             robots = self.robots
             if parsed.netloc != self.url.netloc:
                 try:
-                    robots.set_url(self.url.scheme+'://'+urlparse(seed_url).netloc+'/robots.txt')
+                    robots.set_url(self.url.scheme+'://'+self.url.netloc+'/robots.txt')
                     robots.read()
                 except:
                     robots = AlwaysRobot()
@@ -94,7 +94,7 @@ class Page:
             robots = self.robots
             if parsed.netloc != self.url.netloc:
                 try:
-                    robots.set_url(self.url.scheme+'://'+urlparse(seed_url).netloc+'/robots.txt')
+                    robots.set_url(self.url.scheme+'://'+self.url.netloc+'/robots.txt')
                     robots.read()
                 except:
                     robots = AlwaysRobot()
