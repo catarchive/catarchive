@@ -1,20 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
-from urllib.robotparser import RobotFileParser
 
 UA = 'CatArchiveBot/0.1.0 (+https://github.com/catarchive)'
 
 local_explored = set([])
 
-class AlwaysRobot:
-    def can_fetch(self, foo, bar):
-        return True
-
 class Page:
     def __init__(self, url):
         self.url = urlparse(url)
         self.raw_url = url
+
     def get(self):
         self.response = requests.get(
             self.raw_url,
@@ -24,16 +20,11 @@ class Page:
             timeout=2,
             auth=('user', 'pass')
         )
+
     def explore(self):
         page_data = BeautifulSoup(self.response.text, 'html.parser')
         links = [link.get('href') for link in page_data.find_all('a')]
         images = [image.get('src') for image in page_data.find_all('img')]
-
-        try:
-            self.robots = RobotFileParser(url=self.url.scheme+'://'+self.url.netloc+'/robots.txt')
-            self.robots.read()
-        except:
-            self.robots = AlwaysRobot()
 
         self.links = []
         for link in links:
@@ -54,20 +45,11 @@ class Page:
                     link = self.url.scheme + '://' + self.url.netloc + '/' + link
                 elif len(link) < 4:
                     link = self.url.scheme + '://' + self.url.netloc + '/' + link
-            except:
+            except Exception as e:
+                print("exception,", e)
                 continue
 
-            parsed = urlparse(link)
-            robots = self.robots
-            if parsed.netloc != self.url.netloc:
-                try:
-                    robots.set_url(self.url.scheme+'://'+self.url.netloc+'/robots.txt')
-                    robots.read()
-                except:
-                    robots = AlwaysRobot()
-
-            if robots.can_fetch(UA, link):
-                self.links.append(link)
+            self.links.append(link)
 
         self.images = []
         for image in images:
@@ -85,21 +67,14 @@ class Page:
                     image = self.url.scheme + '://' + self.url.netloc + '/' + image
                 elif len(image) < 4:
                     image = self.url.scheme + '://' + self.url.netloc + '/' + image
-            except:
+            except Exception as e:
+                print("exception,", e)
                 continue
 
             parsed = urlparse(image)
             if parsed.netloc+parsed.path in local_explored:
                 continue
-            robots = self.robots
-            if parsed.netloc != self.url.netloc:
-                try:
-                    robots.set_url(self.url.scheme+'://'+self.url.netloc+'/robots.txt')
-                    robots.read()
-                except:
-                    robots = AlwaysRobot()
 
-            if robots.can_fetch(UA, image):
-                self.images.append(image)
-                local_explored.add(parsed.netloc+parsed.path)
+            self.images.append(image)
+            local_explored.add(parsed.netloc+parsed.path)
 

@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
+
 import threading
 
 import crawler
 
-INITIAL = ['https://old.reddit.com/r/cat']
+INITIAL = ['https://www.reddit.com/r/cat']
 
 def manager():
     while True:
