@@ -1,17 +1,30 @@
 #!/usr/bin/env python3
 
+import queue
 import threading
 
 import crawler
 
-INITIAL = ['https://www.reddit.com/r/cat']
+# The initial links to crawl:
+INITIAL = ['https://www.reddit.com/r/cats']
 
-def manager():
+# TODO: A better architecture for multi-threaded crawling.
+
+def manager(init):
+    """Constantly takes links from the queue and attempts to crawl them."""
+
+    # Create the queue:
+    q = queue.Queue()
+    for link in init:
+        q.put(link)
+
+    # Main crawling loop:
     while True:
-        link = crawler.link_queue.get()
-        crawler.attempt(link)
+        link = q.get()
+        for new_link in crawler.attempt(link):
+            q.put(new_link)
 
 if __name__ == '__main__':
-    threading.Thread(target=manager).start()
-    for link in INITIAL:
-        crawler.link_queue.put(link)
+
+    # Start the manager thread (multi-threading in the future):
+    threading.Thread(target=manager,args=(INITIAL,)).start()
