@@ -80,9 +80,11 @@ class Page:
             # Relative-directory links:
             # TODO: Better relative links (see https://kb.iu.edu/d/abwp).
             # Relative urls are dumb! Use absolute ones please.
-                return self.url.scheme + '://' + self.url.netloc + self.url.path + '/' + link
+                if self.url.path[-1] != '/': return self.url.scheme + '://' + self.url.netloc + self.url.path + '/' + link
+                else: return self.url.scheme + '://' + self.url.netloc + self.url.path + link
             elif len(link) < 5:
-                return self.url.scheme + '://' + self.url.netloc + self.url.path + '/' + link
+                if self.url.path[-1] != '/': return self.url.scheme + '://' + self.url.netloc + self.url.path + '/' + link
+                else: return self.url.scheme + '://' + self.url.netloc + self.url.path + link
             # The link is fine:
             else:
                 return link
