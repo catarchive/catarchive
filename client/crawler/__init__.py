@@ -1,53 +1,80 @@
-import time
 import requests
-import threading
+from urllib.parse import urlparse
 
-from . import web as w
+from . import web
 
-local_explored = set([])
-local_explored_images = set([])
+class Crawler:
+    """Stores the explored pages and has methods for crawling pages."""
 
-def attempt(link):
-    """Attempt to crawl a single webpage. 
-    Any resulting links and images are returned."""
+    def __init__(self):
+        self.local_explored = set([])
+        self.local_images = set([])
+        self.page = web.Page('')
+        self.con_err = False
+        self.tmr = set([])
 
-    # Ensure the page hasn't already been explored:
-    if link in local_explored:
-        return ([], [])
+    def get_filtered_links(self, link):
+        """Get the unexplored links and images from a single webpage."""
 
-    # Instantiate the page class:
-    p = w.Page(link)
+        # Instantiate the page class:
+        self.page = web.Page(link)
 
-    # Try to get the webpage:
-    try:
-        p.get()
-    # Return if there was a connect error or if the request timed out:
-    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-        return ([], [])
+        # Try to get the webpage:
+        try:
+            self.page.get()
+        # Return if there was a connect error or if the request timed out:
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+            self.con_err = True
+            self.local_explored.add(link)
+            return ([], [])
 
-    # Sleep for the appropriate time and reattempt if the status code was 429:
-    if p.response.status_code == 429:
-        print('429, sleeping for', p.response.headers['Retry-After'])
-        time.sleep(int(p.response.headers['Retry-After']))
-        attempt(link)
+        # Return without marking as explored for 429:
+        if self.page.response.status_code == 429:
+            self.tmr.add(self.page.url.netloc)
+            return ([], [])
+        else:
+            if self.page.url.netloc in self.tmr:
+                self.tmr.remove(self.page.url.netloc)
 
-    # Add the link to the explored set:
-    local_explored.add(link)
+        # Add the link to the explored set:
+        self.local_explored.add(link)
 
-    # Return if the status code was not 200:
-    if p.response.status_code != 200:
-        print('bad status code', p.response.status_code, link)
-        return ([], [])
+        # Only follow HTML:
+        try:
+            if self.page.response.headers['Content-Type'][0:10] != 'text/html;':
+                return ([], [])
+        except IndexError:
+            return ([], [])
 
-    # The explore method will set p.links and p.images.
-    p.explore()
+        # Return if the status code was not 200:
+        if self.page.response.status_code != 200:
+            return ([], [])
 
-    # Filter the images:
-    valid_images = []
-    for image in p.images:
-        if image not in local_explored_images:
-            valid_images.append(image)
-            local_explored_images.add(image)
+        # The explore method will set self.page.links and self.page.images.
+        self.page.explore()
 
-    # Return any links to crawl.
-    return (p.links, valid_images)
+        # Filter the links:
+        valid_links = []
+        for link in self.page.links:
+            if link not in self.local_explored:
+                if link.split('.')[-1] == 'pdf' or link.split('.')[-1] == 'gz' or link.split('.')[-1] == 'zip':
+                    if len(link.split('/')[-1].split('.')) != 0:
+                        continue
+                valid_links.append(link)
+
+        # Filter the images:
+        valid_images = []
+        for image in self.page.images:
+            if image not in self.local_images:
+                # We only care about jpegs.
+                if image.split('.')[-1] != 'jpg' and image.split('.')[-1] != 'jpeg':
+                    if '?' in image:
+                        if image.split('.')[-1].split('?')[0] != 'jpg' and image.split('.')[-1].split('?')[0] != 'jpeg':
+                            continue
+                    elif len(image.split('/')[-1].split('.')) != 0:
+                        continue
+                valid_images.append(image)
+                self.local_images.add(image)
+
+        # Return any links to crawl.
+        return (valid_links, valid_images)
