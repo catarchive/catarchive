@@ -25,7 +25,7 @@ def classify(img):
     """Runs the given image through the ResNet model and returns the results."""
 
     # Preprocess the image:
-    img_t = preprocess(Image.open(img.raw))
+    img_t = preprocess(Image.open(img.raw).convert('RGB'))
 
     # Feed the image through ResNet:
     batch_t = torch.unsqueeze(img_t, 0)

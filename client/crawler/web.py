@@ -21,7 +21,7 @@ class Page:
             headers={
                 'User-Agent': UA
             },
-            timeout=2,
+            timeout=3,
             auth=('user', 'pass')
         )
 
@@ -47,11 +47,6 @@ class Page:
             image = self.format_url(image)
             if image == '':
                 continue
-
-            # We only care about jpegs.
-            if image.rsplit('.')[-1] != 'jpg' and image.rsplit('.')[-1] != 'jpeg':
-                if len(image.rsplit('.')) != 0:
-                    continue
 
             # Append each valid image to self.images:
             self.images.append(image)
