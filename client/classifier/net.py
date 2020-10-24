@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 # neural net class
 class Net(nn.Module):
-    # Initialie the model with appropriate starting weights
+    # initialie the model with appropriate starting weights
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 256, 256)
@@ -16,7 +16,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    # nalculations based on image tensor input
+    # calculations based on image tensor input
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
