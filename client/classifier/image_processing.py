@@ -5,19 +5,23 @@ import numpy as np
 from PIL import Image
 from torch.utils.data.dataset import Dataset
 
-# class to handle image and label input
+
 class ImageData(Dataset):
+    ''' class to represent image and label input '''
+
     def __init__(self, yx, width=256, height=256, transform=None):
         self.width = width
         self.height = height
         self.transform = transform
-        y, x = yx # y is an array of labels, x is an array of images
-        self.y = y
-        self.x = x
-    
+        y, x = yx 
+        self.y = y # array of label
+        self.x = x # array of image paths
+
     def __getitem__(self, index):
-        img = Image.open(self.x[index]) # use pillow to open a file
-        img = img.resize((self.width, self.height)) # resize the file to 256x256
+        ''' process image and labels to be sent to the NN '''
+
+        img = Image.open(self.x[index]) 
+        img = img.resize((self.width, self.height)) 
         img = img.convert('RGB') #convert image to RGB channel
         if self.transform is not None:
             img = self.transform(img)
@@ -26,6 +30,7 @@ class ImageData(Dataset):
         img = img/255
         img = torch.from_numpy(np.asarray(img)) # create the image tensor
         label = torch.from_numpy(np.asarray(self.y[index]).reshape([1, 1])) # create the label tensor
+        
         return img, label, self.x[index]
     
     def __len__(self):

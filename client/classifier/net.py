@@ -1,5 +1,6 @@
 # file containing the network model
 # see https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
