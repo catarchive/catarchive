@@ -1,6 +1,7 @@
 # file to hanle network file (model/net.pth)
 
 import os 
+import torch
 import requests
 
 
@@ -25,4 +26,9 @@ class ModelManager:
         open('model/net.pth', 'wb').write(r.content)
 
         return self.path
+
+    def load(self):
+        """ load the model for the NN """
+
+        return torch.load(self.path)
 
