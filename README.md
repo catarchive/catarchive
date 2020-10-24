@@ -1,5 +1,9 @@
 # Cat Archive
 
+*A cat:*
+
+![cat](https://avatars2.githubusercontent.com/u/73047212?s=200&v=4)
+
 Open-source, distributed, cat archive platform.
 
 Work in progress.
