@@ -1,2 +1,4 @@
 __pycache__/
 *.log
+server/control/control
+server/web/web
