@@ -2,6 +2,7 @@ from .image_processing import ImageData
 from .net import Net
 from .model_manager import ModelManager
 from .utils import device
+import torch
 
 
 
@@ -21,7 +22,7 @@ def classify(img):
     
     data = ImageData([[True], [img]])
     tensor_image, label, img_path = data[0]
-    tensor_image, label = tensor_image.to(device), label.to(device)
+    tensor_image, label = tensor_image.to(device).unsqueeze(0), label.to(device)
     
     output = net(tensor_image.float())
 

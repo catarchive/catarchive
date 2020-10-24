@@ -1,6 +1,7 @@
 # file for handling image inputs (images from web and dataset for training)
 # see https://towardsdatascience.com/building-efficient-custom-datasets-in-pytorch-2563b946fd9f
 
+import torch
 import numpy as np
 from PIL import Image
 from torch.utils.data.dataset import Dataset

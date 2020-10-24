@@ -9,7 +9,8 @@ class ModelManager:
     ''' class to represent the model file '''
     
     def __init__(self, url='https://hosting.greerpage.com/files/greer_page/net.pth'):
-        self.path = os.path.abspath('model/net.pth')
+        self.path = os.path.abspath(os.path.dirname(__file__)+'/model/net.pth')
+        self.dir = os.path.abspath(os.path.dirname(__file__)+'/model')
         self.installed = os.path.isfile(self.path)
         self.url = url
 
@@ -20,10 +21,10 @@ class ModelManager:
             print('model already installed')
             return
 
-        r = requests.get(self.url, allow_redirects=True)
         print('downloading model...')
-        os.mkdir('model')
-        open('model/net.pth', 'wb').write(r.content)
+        os.mkdir(self.dir)
+        r = requests.get(self.url, allow_redirects=True)
+        open(self.path, 'wb').write(r.content)
 
         return self.path
 
