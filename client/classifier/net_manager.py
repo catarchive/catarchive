@@ -11,9 +11,11 @@ class NetManager:
 
     def install(self):
         '''download and install the pre-trained net.pth file'''
+        
         if self.installed:
             print('model already installed')
             return
+            
         r = requests.get(self.url, allow_redirects=True)
         print('downloading model...')
         os.mkdir('model')

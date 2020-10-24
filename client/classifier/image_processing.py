@@ -14,7 +14,7 @@ class ImageData(Dataset):
         y, x = yx # y is an array of labels, x is an array of images
         self.y = y
         self.x = x
-
+    
     def __getitem__(self, index):
         img = Image.open(self.x[index]) # use pillow to open a file
         img = img.resize((self.width, self.height)) # resize the file to 256x256
