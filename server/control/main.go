@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 
 	// Set addr to the address to listen on
-	addr := ":" + strconv.Itoa(*port)
+	addr := ":"+strconv.Itoa(*port)
 
 	// Start a tcp listener
 	ln, err := net.Listen("tcp", addr)
