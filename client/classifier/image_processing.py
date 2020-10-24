@@ -1,11 +1,11 @@
-# File for handling image inputs (images from web and dataset for training)
+# file for handling image inputs (images from web and dataset for training)
 # see https://towardsdatascience.com/building-efficient-custom-datasets-in-pytorch-2563b946fd9f
 
 import numpy as np
 from PIL import Image
 from torch.utils.data.dataset import Dataset
 
-# Class to handle image and label input
+# class to handle image and label input
 class ImageData(Dataset):
     def __init__(self, yx, width=256, height=256, transform=None):
         self.width = width
