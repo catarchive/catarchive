@@ -6,7 +6,7 @@ import requests
 
 
 class ModelManager:
-    ''' class to represent the model file '''
+    """ Class to represent the model file. """
     
     def __init__(self, url='https://hosting.greerpage.com/files/greer_page/net.pth'):
         self.path = os.path.abspath(os.path.dirname(__file__)+'/model/net.pth')
@@ -15,7 +15,7 @@ class ModelManager:
         self.url = url
 
     def install(self):
-        '''download and install the pre-trained net.pth file'''
+        """ Download and install the pre-trained net.pth file. """
         
         if self.installed:
             print('model already installed')
@@ -29,7 +29,7 @@ class ModelManager:
         return self.path
 
     def load(self):
-        """ load the model for the NN """
+        """ Load the model for the NN. """
 
         return torch.load(self.path)
 

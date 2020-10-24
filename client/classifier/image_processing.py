@@ -8,7 +8,7 @@ from torch.utils.data.dataset import Dataset
 
 
 class ImageData(Dataset):
-    ''' class to represent image and label input '''
+    """ Class to represent image and label input. """
 
     def __init__(self, yx, width=256, height=256, transform=None):
         self.width = width
@@ -19,7 +19,7 @@ class ImageData(Dataset):
         self.x = x # array of image paths
 
     def __getitem__(self, index):
-        ''' process image and labels to be sent to the NN '''
+        """ Process image and labels to be sent to the NN. """
 
         img = Image.open(self.x[index]) 
         img = img.resize((self.width, self.height)) 
