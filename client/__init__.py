@@ -73,7 +73,7 @@ def main():
     print('CA: Using URLs:', urls)
 
     # Instantiate client:
-    c = client.Client(urls)
+    c = client.Client(urls, s)
 
     # Start the client
     try:
