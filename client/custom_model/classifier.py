@@ -34,6 +34,9 @@ def classify(img, is_url=False):
 def train(epochs):
     """ Train the NN on the dataset in cats/. """
 
+    if not dset.installed:
+        dset.installed()
+
     dset.make_set()
 
     for epoch in range(epochs):
