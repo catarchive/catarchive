@@ -20,34 +20,41 @@ def main():
     parser.add_argument('-t', '--token', type=str, help='The authentication token of the server to connect to, or set the CAT_ARCHIVE_TOKEN environment variable', default='')
     args = parser.parse_args()
 
-    e = args.endpoint.split(':')
-    if len(e) < 2 or (len(e) > 1 and not e[1].isdigit()):
-        print('CA: Error: Invalid endpoint', file=sys.stderr)
+    endpoint = args.endpoint.split(':')
+    if len(endpoint) < 2 or (len(endpoint) > 1 and not endpoint[1].isdigit()):
+        print('CA: Error: Invalid endpoint')
         exit(1)
 
+    # Use environment variable if args.token is empty
     if args.token == '':
         if (cat := os.environ.get('CAT_ARCHIVE_TOKEN')) != None:
             args.token = cat
         else:
-            print('CA: Error: Invalid token', file=sys.stderr)
+            print('CA: Error: Invalid token')
             exit(1)
 
     # Instantiate server class
-    s = network.Server(e[0], int(e[1]), args.token)
+    s = network.Server(endpoint[0], int(endpoint[1]), args.token)
 
     # Connect
     try:
         s.connect()
     except Exception as e:
-        print('CA: Error: Could not connect to server, exception:', e, file=sys.stderr)
+        print('CA: Error: Could not connect to server, exception:', e)
+        s.close()
         exit(1)
-    print('CA: Connected to', e[0]+e[1])
+    print('CA: Connected to', endpoint[0]+":"+endpoint[1])
 
     # Authenticate
     try:
         s.auth()
+    except network.exceptions.InvalidStrtPacketReceived:
+        print('CA: Error: Could not authenticate, invalid STRT packet received')
+        s.close()
+        exit(1)
     except Exception as e:
-        print('CA: Error: Could not authenticate with server, exception:', e, file=sys.stderr)
+        print('CA: Error: Could not authenticate with server, exception:', e)
+        s.close()
         exit(1)
     print('CA: Authenticated successfully')
 
@@ -55,24 +62,32 @@ def main():
     urls = []
     try:
         urls = s.urls()
+    except network.exceptions.InvalidUrlsPacketReceived:
+        print('CA: Error: Invalid URLS packet received')
+        s.close()
+        exit(1)
     except Exception as e:
-        print('CA: Error: Could not get URLs from server, exception:', e, file=sys.stderr)
-        os.exit(1)
-    print('CA: using URLs:', urls)
+        print('CA: Error: Could not get URLs from server, exception:', e)
+        s.close()
+        exit(1)
+    print('CA: Using URLs:', urls)
 
-    # Instantiate client
+    # Instantiate client:
     c = client.Client(urls)
 
+    # Start the client
     try:
         c.start()
     except KeyboardInterrupt:
         pass
 
+    # Write found cats
     with open('./cats.log', 'a+') as f:
         for cat in list(c.cats):
             f.write(cat + '\n')
 
     print('CA: Done.')
+    s.close()
     exit(0)
 
 if __name__ == '__main__':
