@@ -13,13 +13,14 @@ except ImportError:
 class Client:
     """Stores and controls the client's state."""
 
-    def __init__(self, initial):
+    def __init__(self, initial, server):
         self.image_queue = queue.Queue()
         self.link_queue = queue.PriorityQueue()
         for link in initial:
             self.link_queue.put((0,link))
         self.crawler = crawler.Crawler()
         self.cats = set([])
+        self.server = server
 
     def calculate_priority(self, link):
         """Calculates the priority number of a link."""
@@ -116,6 +117,7 @@ class Client:
             results = classifier.classify(image.raw)
             if results[0]:
                 print('CA: Classifier: Cat found', results[1], url)
+                self.server.imag(url)
                 self.cats.add(url)
             else:
                 print('CA: Classifier: Not a cat', results[1], url)
