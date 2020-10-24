@@ -10,8 +10,6 @@ class TrainingSet:
         self.url = url
         self.dir = os.path.abspath(os.path.dirname(__file__)+'/cats')
         self.installed = os.path.isdir(self.dir)
-        self.data = ImageData(get_images())
-        self.set = DataLoader(self.data, batch_size=10, shuffle=True, num_workers=1)
         self.zip = os.path.abspath(os.path.dirname(__file__)+'/cats.zip')
 
     def install(self):
@@ -25,4 +23,14 @@ class TrainingSet:
         r = requests.get(self.url, allow_redirects=True)
         open(self.zip, 'wb').write(r.content)
         with zipfile.ZipFile(self.zip, 'r') as z:
-            z.extractall(self.dir)
+            z.extractall(os.path.abspath(os.path.dirname(__file__)))
+        os.remove(self.zip)
+
+    def make_set(self):
+
+        if not self.installed:
+            print('dataset not installed')
+            return 
+
+        self.data = ImageData(get_images())
+        self.set = DataLoader(self.data, batch_size=10, shuffle=True, num_workers=1)
