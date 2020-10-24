@@ -7,3 +7,5 @@ server/control/control
 *.pth
 client/classifier/cats/
 client/custom_model/cats/
+
+client/test.py

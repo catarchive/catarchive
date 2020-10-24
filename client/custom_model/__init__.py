@@ -1,1 +1,1 @@
-from .classifier import classify
+from .classifier import classify, train
