@@ -1,4 +1,9 @@
 __pycache__/
+
 *.log
-server/control/control
 server/web/web
+server/control/control
+
+*.pth
+client/classifier/cats/
+client/custom_model/cats/
