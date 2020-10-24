@@ -1,3 +1,5 @@
 from classifier import classify
+import requests
 
-print(classify('/home/greer/dev/python/torch_test/cat.jpg'))
+r = requests.get('https://greerpage.com/static/images/favicon.png', stream=True)
+print(classify(r, is_url=True))
