@@ -1,3 +1,4 @@
+# file for state of net class
 
 from .net import Net
 from .utils import device
@@ -8,6 +9,8 @@ import torch.nn as nn
 import torch.optim as optim
 
 class InitializeNet:
+    """ Class to store the state of the net and other necessary things. """
+    
     def __init__(self, training=False):
         self.device = device
         self.net = Net()
