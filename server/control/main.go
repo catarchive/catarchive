@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/catarchive/catarchive/server/control/protocol"
 	"github.com/catarchive/catarchive/server/control/util"
 	"net"
 	"strconv"
@@ -35,6 +36,6 @@ func main() {
 		util.Logger.Println("accepted new connection from", conn.RemoteAddr())
 
 		// Handle it in another goroutine
-		go handle(conn)
+		go handle(protocol.NewClient(conn))
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// Parse will parse a string into a message struct according to the CAP protocol.
-func Parse(message string) (Message, error) {
+// parse will parse a string into a message struct according to the CAP protocol.
+func parse(message string) (Message, error) {
 
 	// Split the message
 	p := strings.Split(message, " ")
