@@ -13,14 +13,14 @@ net, device, model, dset, optimizer, criterion = i.net, i.device, i.model, i.set
 if not model.installed:
     model.install()
 
-# set up the dataset
+# set up the NN
 net.cuda(device)
 net.load_state_dict(model.load())
 
 def classify(img, is_url=False):
     """ Runs the given image through the model and returns the results. """
 
-    data = ImageData([[True], [img]]) if not is_url else ImageData([[True], [img]], is_url=True) # pass image and unused label to be turned to tensors
+    data = ImageData([[True], [img]]) if not is_url else ImageData([[True], [img]], is_url=True) # pass image to be "tensorized"
     tensor_image, _, img_path = data[0] # get image tensor etc
     tensor_image = tensor_image.to(device).unsqueeze(0) # format image tensor
     
@@ -56,5 +56,3 @@ def train(epochs):
     print('Finished Training')
     PATH = os.path.abspath(os.path.dirname(__file__)+'/model/net.pth')
     torch.save(net.state_dict(), PATH)
-
-    
