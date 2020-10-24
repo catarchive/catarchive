@@ -1,2 +1,4 @@
 __pycache__/
 *.log
+*.pth
+client/classifier/model/
