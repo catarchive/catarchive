@@ -2,3 +2,6 @@ __pycache__/
 *.log
 *.pth
 client/classifier/model/
+client/custom_model/model/
+client/custom_model/cats/
+client/classifier/cats/
