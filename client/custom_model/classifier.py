@@ -1,53 +1,57 @@
-# file that runs classification on given images
+# file that defines external functions
 
+import os 
 import torch
 from .image_processing import ImageData
 from .initialize_net import InitializeNet
 
+# initilaize the state for the NN and other necessary info
+i = InitializeNet()
+net, device, model, dset, optimizer, criterion = i.net, i.device, i.model, i.set, i.optimizer, i.criterion
+
+# install model if its not isntalled
+if not model.installed:
+    model.install()
+
+# set up the dataset
+net.cuda(device)
+net.load_state_dict(model.load())
+
 def classify(img, is_url=False):
     """ Runs the given image through the model and returns the results. """
 
-    i = InitializeNet()
-    net, device, model = i.net, i.device, i.model
-
-    if not model.installed:
-        model.install()
+    data = ImageData([[True], [img]]) if not is_url else ImageData([[True], [img]], is_url=True) # pass image and unused label to be turned to tensors
+    tensor_image, _, img_path = data[0] # get image tensor etc
+    tensor_image = tensor_image.to(device).unsqueeze(0) # format image tensor
     
-    net.cuda(device)
-    net.load_state_dict(model.load())
-    
-    data = ImageData([[True], [img]]) if not is_url else ImageData([[True], [img]], is_url=True)
-    tensor_image, _, img_path = data[0]
-    tensor_image = tensor_image.to(device).unsqueeze(0)
-    
-    output = net(tensor_image.float())
+    output = net(tensor_image.float()) # run image tensor through network to get predicted value (1 is cat 0 is not)
 
     _, predicted = torch.max(output, 1)
     cat = True if predicted.item() == 1 else False
 
     return cat, img_path
 
-def train(self, epochs):
+def train(epochs):
     """ Train the NN on the dataset in cats/. """
 
-    
+    dset.make_set()
 
     for epoch in range(epochs):
-        for i, data in enumerate(self.set.set, 0):
+        for _, data in enumerate(dset.set, 0):
 
-            inputs, labels, img_name = data
-            inputs, labels = inputs.to(self.device), labels.to(self.device).squeeze().long()
+            inputs, labels, _ = data
+            inputs, labels = inputs.to(device), labels.to(device).squeeze().long()
 
-            self.optimizer.zero_grad()
+            optimizer.zero_grad()
 
-            outputs = self.net(inputs.float()) # predicted values (1 if cat 0 if not cat)
-            loss = self.criterion(outputs, labels) # calculate the loss
+            outputs = net(inputs.float()) # predicted values (1 if cat 0 if not cat)
+            loss = criterion(outputs, labels) # calculate the loss
             print('epoch:', epoch, 'loss of batch:', loss.item())
             loss.backward() # calculate improved weights based on loss
-            self.optimizer.step() # optimize with new weights
+            optimizer.step() # optimize with new weights
 
     print('Finished Training')
     PATH = os.path.abspath(os.path.dirname(__file__)+'/model/net.pth')
-    torch.save(self.net.state_dict(), PATH)
+    torch.save(net.state_dict(), PATH)
 
     
