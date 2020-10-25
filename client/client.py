@@ -57,6 +57,7 @@ class Client:
             # Page wasn't HTML:
             try:
                 if self.crawler.page.response.headers['Content-Type'][0:10] != 'text/html;':
+                    print('CA: Crawler: Link not HTML', link)
                     continue
             except IndexError:
                 continue
@@ -104,6 +105,13 @@ class Client:
                     auth=('user', 'pass')
                 )
                 image.raw.decode_content = True
+                # 32 MB limit
+                try:
+                    if int(image.headers['Content-Length']) > (1024 ** 2) * 32:
+                        print('CA: Classifier: Image too big', url)
+                        continue
+                except IndexError:
+                    pass
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
                 print('CA: Classifier: Could not connect', url)
                 self.image_queue.task_done()
