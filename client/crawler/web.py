@@ -22,6 +22,7 @@ class Page:
                 'User-Agent': UA
             },
             timeout=3,
+            stream=True,
             auth=('user', 'pass')
         )
 
