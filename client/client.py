@@ -1,26 +1,28 @@
 import queue
 import requests
 import threading
+import sys
 from urllib.parse import urlparse
 
 try:
     from . import crawler
     from . import classifier
+    from . import network
 except ImportError:
     import crawler
     import classifier
+    import network
 
 class Client:
     """Stores and controls the client's state."""
 
-    def __init__(self, initial, server):
+    def __init__(self, server):
         self.image_queue = queue.Queue()
         self.link_queue = queue.PriorityQueue()
-        for link in initial:
-            self.link_queue.put((0,link))
         self.crawler = crawler.Crawler()
         self.cats = set([])
         self.server = server
+        self.error_event = threading.Event()
 
     def calculate_priority(self, link):
         """Calculates the priority number of a link."""
@@ -117,17 +119,54 @@ class Client:
             results = classifier.classify(image.raw)
             if results[0]:
                 print('CA: Classifier: Cat found', results[1], url)
-                self.server.imag(url)
+                try:
+                    self.server.imag(url)
+                except network.exceptions.SocketClosed:
+                    print('CA: Classifier: Error: Socket closed')
+                    self.error_event.set()
+                    sys.exit(1)
                 self.cats.add(url)
             else:
                 print('CA: Classifier: Not a cat', results[1], url)
 
             self.image_queue.task_done()
 
+    def queuer_thread(self):
+        """Queuer thread to request new URLs when the queue runs out."""
+
+        while True:
+
+            # Wait for the link queue to run out
+            self.link_queue.join()
+            print('CA: Queuer: Requesting more URLs')
+
+            # Get URLs from the server
+            urls = []
+            try:
+                urls = self.server.urls()
+            except network.exceptions.InvalidUrlsPacketReceived:
+                print('CA: Queuer: Error: Invalid URLS packet received', results[1], url)
+                self.error_event.set()
+                sys.exit(1)
+            except network.exceptions.SocketClosed:
+                print('CA: Queuer: Error: Socket closed')
+                self.error_event.set()
+                sys.exit(1)
+   
+            print('CA: Queuer: New URLs:', urls)
+
+            # Add them to the queue
+            for link in urls:
+                self.link_queue.put((0, link))
+
     def start(self):
         """Starts both threads and blocks until both queues are empty."""
 
+        # Start the threads
         threading.Thread(target=self.crawler_thread, daemon=True).start()
         threading.Thread(target=self.classifier_thread, daemon=True).start()
-        self.link_queue.join()
-        self.image_queue.join()
+        threading.Thread(target=self.queuer_thread, daemon=True).start()
+
+        # Wait for an error event
+        self.error_event.wait()
+        raise KeyboardInterrupt()
