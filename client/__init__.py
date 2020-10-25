@@ -23,7 +23,7 @@ def main():
     endpoint = args.endpoint.split(':')
     if len(endpoint) < 2 or (len(endpoint) > 1 and not endpoint[1].isdigit()):
         print('CA: Error: Invalid endpoint')
-        exit(1)
+        sys.exit(1)
 
     # Use environment variable if args.token is empty
     if args.token == '':
@@ -31,7 +31,7 @@ def main():
             args.token = cat
         else:
             print('CA: Error: Invalid token')
-            exit(1)
+            sys.exit(1)
 
     # Instantiate server class
     s = network.Server(endpoint[0], int(endpoint[1]), args.token)
@@ -42,7 +42,7 @@ def main():
     except Exception as e:
         print('CA: Error: Could not connect to server, exception:', e)
         s.close()
-        exit(1)
+        sys.exit(1)
     print('CA: Connected to', endpoint[0]+":"+endpoint[1])
 
     # Authenticate
@@ -51,34 +51,20 @@ def main():
     except network.exceptions.InvalidStrtPacketReceived:
         print('CA: Error: Could not authenticate, invalid STRT packet received')
         s.close()
-        exit(1)
+        sys.exit(1)
     except Exception as e:
         print('CA: Error: Could not authenticate with server, exception:', e)
         s.close()
-        exit(1)
+        sys.exit(1)
     print('CA: Authenticated successfully')
 
-    # Get URLs
-    urls = []
-    try:
-        urls = s.urls()
-    except network.exceptions.InvalidUrlsPacketReceived:
-        print('CA: Error: Invalid URLS packet received')
-        s.close()
-        exit(1)
-    except Exception as e:
-        print('CA: Error: Could not get URLs from server, exception:', e)
-        s.close()
-        exit(1)
-    print('CA: Using URLs:', urls)
-
     # Instantiate client:
-    c = client.Client(urls, s)
+    c = client.Client(s)
 
     # Start the client
     try:
         c.start()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, network.exceptions.SocketClosed):
         pass
 
     # Write found cats
@@ -86,9 +72,9 @@ def main():
         for cat in list(c.cats):
             f.write(cat + '\n')
 
-    print('CA: Done.')
+    print('CA: Wrote to cats.log')
     s.close()
-    exit(0)
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
