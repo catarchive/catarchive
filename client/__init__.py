@@ -64,7 +64,7 @@ def main():
     # Start the client
     try:
         c.start()
-    except (KeyboardInterrupt, network.exceptions.SocketClosed):
+    except KeyboardInterrupt:
         pass
 
     # Write found cats
