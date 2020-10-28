@@ -12,6 +12,6 @@ ARG control_token=token
 ENV CA_CONTROL_PORT=$control_port
 ENV CA_CONTROL_TOKEN=$control_token
 
-EXPOSE $port
+EXPOSE $control_port
 
 CMD ["control"]

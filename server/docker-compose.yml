@@ -12,3 +12,14 @@ services:
       - "0.0.0.0:9908:9908/tcp"
     volumes:
       - /var/log/ca_control:/go/src/control/log
+  web:
+    build:
+      context: ./web
+      args:
+        - web_port=8000
+    image: ca_web
+    container_name: ca_web
+    ports:
+      - "0.0.0.0:8000:8000/tcp"
+    volumes:
+      - /var/log/ca_web:/go/src/web/log
