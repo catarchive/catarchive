@@ -28,7 +28,9 @@ Note that image storage takes place separately, in a distributed file store.
 
 This entire stack can be seamlessly deployed and managed with Docker Compose.
 
-### Quickstart guide
+### Quickstart guide (Linux)
+
+You of course need `docker-compose` installed. You will also need `postgresql` in order to use the `psql` client for initializing a table (see last command).
 
 ```bash
 git clone https://github.com/catarchive/catarchive
@@ -36,7 +38,8 @@ cd catarchive/server
 cp default.env .env
 vim .env # edit the .env file to set some required configuration
 docker-compose build
-docker-compose up # all the services should start up!
+docker-compose up -d # all the containers should start up (run 'docker ps' to see them)
+psql -h localhost -U catarchive <rc.sql # create the schema and table for the database
 ```
 
 Note that when running any `docker-compose` commands you must be root, or in the `docker` group.
