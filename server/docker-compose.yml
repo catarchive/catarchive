@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  control:
+    build:
+      context: ./control
+      args:
+        - control_port=9908
+        - control_token=token
+    image: ca_control
+    container_name: ca_control
+    ports:
+      - "0.0.0.0:9908:9908/tcp"
+    volumes:
+      - /var/log/ca_control:/go/src/control/log
