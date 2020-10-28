@@ -1,6 +1,7 @@
 __pycache__/
 
 *.log
+.env
 server/web/web
 server/control/control
 
