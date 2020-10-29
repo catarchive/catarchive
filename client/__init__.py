@@ -33,7 +33,8 @@ def main():
 
         # Use environment variable if args.token is empty
         if args.token == '':
-            if (cat := os.environ.get('CAT_ARCHIVE_TOKEN')) != None:
+            cat = os.environ.get('CAT_ARCHIVE_TOKEN')
+            if cat != None:
                 args.token = cat
             else:
                 print('CA: Error: Invalid token')
