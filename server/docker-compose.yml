@@ -32,3 +32,10 @@ services:
       - ${CA_DB_PUBLISH}:5432
     volumes:
       - ${CA_DB_DATA}:/var/lib/postgresql/data
+  seaweed:
+    build:
+      context: ./seaweed
+    container_name: ca_seaweed
+    ports:
+      - ${CA_SEAWEED_PUBLISH}:9333
+      - ${CA_SEAWEED_PUBLISH_2}:19333
