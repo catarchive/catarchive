@@ -34,11 +34,10 @@ def classify(img, is_url=False):
 
 def train(epochs, start_from_scratch=False):
     """ Train the NN on the dataset in cats/. """
+        
+    n = Net() if start_from_scratch else net
+    n.cuda(device)
 
-    if start_from_scratch:
-        net = Net()
-        net.cuda(device)
-     
     if not dset.installed:
          dset.install()
 
@@ -52,7 +51,7 @@ def train(epochs, start_from_scratch=False):
 
             optimizer.zero_grad()
 
-            outputs = net(inputs.float()) # predicted values (1 if cat 0 if not cat)
+            outputs = n(inputs.float()) # predicted values (1 if cat 0 if not cat)
             loss = criterion(outputs, labels) # calculate the loss
             print('epoch:', epoch, 'loss of batch:', loss.item())
             loss.backward() # calculate improved weights based on loss
