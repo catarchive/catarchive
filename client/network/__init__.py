@@ -5,6 +5,8 @@ from . import exceptions
 PROTO = 'CAP/0.1.0'
 BUFSIZ = 1024
 
+local_urls = []
+
 def try_close(func):
     """Decorator to wrap function in a try/except for OSError.""" 
 
@@ -16,6 +18,20 @@ def try_close(func):
 
     return tc
 
+def local(func):
+    """Decorator cancel network if local_urls != []""" 
+
+    def nop():
+        pass
+
+    def ll(*args, **kwarg):
+        if local_urls == []:
+            return func(*args, **kwarg)
+        else:
+            return nop()
+
+    return ll
+
 class Server:
     """Represents a remote connection to a server."""
 
@@ -25,11 +41,13 @@ class Server:
         self.ip = ip
         self.port = port
 
+    @local
     def connect(self):
         """Attempts to connect to the server."""
 
         self.socket.connect((self.ip, self.port))
 
+    @local
     @try_close
     def auth(self):
         """Sends the authentication packet to the server.
@@ -44,6 +62,7 @@ class Server:
 
         return resp[0]
 
+    @local
     @try_close
     def imag(self, url):
         """Sends an image URL to the server."""
@@ -55,6 +74,9 @@ class Server:
         """Request URLs to crawl from the server.
         Returns said URLs."""
 
+        if local_urls != []:
+            return local_urls
+
         self.socket.send(bytes(PROTO + ' URLS', 'utf8'))
         resp = self.socket.recv(BUFSIZ).decode('utf8').split(' ')
         if len(resp) < 3 or (len(resp) > 1 and (resp[1] != 'URLS')):
@@ -62,6 +84,7 @@ class Server:
 
         return resp[2:]
 
+    @local
     def close(self):
         """Cleanly closes the socket."""
 

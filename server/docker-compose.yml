@@ -1,0 +1,41 @@
+version: "3.7"
+services:
+  control:
+    build:
+      context: ./control
+      args:
+        - control_port=9908
+        - control_token=${CA_CONTROL_TOKEN}
+    container_name: ca_control
+    ports:
+      - ${CA_CONTROL_PUBLISH}:9908
+    volumes:
+      - ${CA_CONTROL_LOG}:/go/src/control/log
+  web:
+    build:
+      context: ./web
+      args:
+        - web_port=8000
+    container_name: ca_web
+    ports:
+      - ${CA_WEB_PUBLISH}:8000
+    volumes:
+      - ${CA_WEB_LOG}:/go/src/web/log
+  db:
+    image: postgres
+    container_name: ca_db
+    environment:
+      POSTGRES_DB: catarchive
+      POSTGRES_USER: ${CA_DB_USER}
+      POSTGRES_PASSWORD: ${CA_DB_PASS}
+    ports:
+      - ${CA_DB_PUBLISH}:5432
+    volumes:
+      - ${CA_DB_DATA}:/var/lib/postgresql/data
+  seaweed:
+    build:
+      context: ./seaweed
+    container_name: ca_seaweed
+    ports:
+      - ${CA_SEAWEED_PUBLISH}:9333
+      - ${CA_SEAWEED_PUBLISH_2}:19333
