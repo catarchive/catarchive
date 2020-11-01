@@ -2,6 +2,7 @@
 
 import os 
 import torch
+from .net import Net
 from .image_processing import ImageData
 from .initialize_net import InitializeNet
 
@@ -31,11 +32,15 @@ def classify(img, is_url=False):
 
     return cat, img_path
 
-def train(epochs):
+def train(epochs, start_from_scratch=False):
     """ Train the NN on the dataset in cats/. """
 
+    if start_from_scratch:
+        net = Net()
+        net.cuda(device)
+
     if not dset.installed:
-        dset.installed()
+        dset.install()
 
     dset.make_set()
 
