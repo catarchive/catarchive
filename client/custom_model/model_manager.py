@@ -22,7 +22,10 @@ class ModelManager:
             return
 
         print('downloading model...')
-        os.mkdir(self.dir)
+
+        if not os.path.isdir(self.dir):
+            os.mkdir(self.dir)
+            
         r = requests.get(self.url, allow_redirects=True)
         open(self.path, 'wb').write(r.content)
 

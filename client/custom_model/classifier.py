@@ -38,9 +38,9 @@ def train(epochs, start_from_scratch=False):
     if start_from_scratch:
         net = Net()
         net.cuda(device)
-
+     
     if not dset.installed:
-        dset.install()
+         dset.install()
 
     dset.make_set()
 

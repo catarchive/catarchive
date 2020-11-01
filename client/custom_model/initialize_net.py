@@ -11,7 +11,7 @@ import torch.optim as optim
 class InitializeNet:
     """ Class to store the state of the net and other necessary things. """
     
-    def __init__(self, training=False):
+    def __init__(self):
         self.device = device
         self.net = Net()
         self.net = self.net.float()
