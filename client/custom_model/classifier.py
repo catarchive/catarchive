@@ -15,7 +15,7 @@ if not model.installed:
     model.install()
 
 # set up the NN
-net.cuda(device)
+net.to(device)
 net.load_state_dict(model.load())
 
 def classify(img, is_url=False):
@@ -36,7 +36,7 @@ def train(epochs, start_from_scratch=False):
     """ Train the NN on the dataset in cats/. """
         
     n = Net() if start_from_scratch else net
-    n.cuda(device)
+    n.to(device)
 
     if not dset.installed:
          dset.install()
