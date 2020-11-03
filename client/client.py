@@ -4,25 +4,28 @@ import threading
 import sys
 from urllib.parse import urlparse
 
-try:
-    from . import crawler
-    from . import classifier
-    from . import network
-except ImportError:
-    import crawler
-    import classifier
-    import network
+custom = False
+
+from .crawler import Crawler
+from .crawler.web import UA
+from .network import exceptions as netexcept
 
 class Client:
     """Stores and controls the client's state."""
 
-    def __init__(self, server):
+    def __init__(self, server, custom):
         self.image_queue = queue.Queue()
         self.link_queue = queue.PriorityQueue()
-        self.crawler = crawler.Crawler()
+        self.crawler = Crawler()
         self.cats = set([])
         self.server = server
         self.error_event = threading.Event()
+        if custom:
+            from . import custom_model
+            self.classify = custom_model.classify
+        else:
+            from . import classifier
+            self.classify = classifier.classify
 
     def calculate_priority(self, link):
         """Calculates the priority number of a link."""
@@ -42,22 +45,22 @@ class Client:
             link = self.link_queue.get()[1]
             if link in self.crawler.local_explored:
                 continue
-            print('CA: Crawler: Getting', link)
+            print('Crawler: Getting', link)
 
             # Crawl the page:
             results = self.crawler.get_filtered_links(link)
 
             # Handle connection errors:
             if self.crawler.con_err:
-                print('CA: Crawler: Connection error', link)
+                print('Crawler: Connection error', link)
                 self.crawler.con_err = False
                 self.link_queue.task_done()
                 continue
 
             # Page wasn't HTML:
             try:
-                if self.crawler.page.response.headers['Content-Type'][0:10] != 'text/html;':
-                    print('CA: Crawler: Link not HTML', link)
+                if self.crawler.page.response.headers['Content-Type'][0:9] != 'text/html':
+                    print('Crawler: Link not HTML', link, self.crawler.page.response.headers['Content-Type'])
                     continue
             except IndexError:
                 continue
@@ -66,10 +69,10 @@ class Client:
             sc = self.crawler.page.response.status_code
             if sc != 200:
                 if sc == 429:
-                    print('CA: Crawler: Status code 429, adding back to queue', link)
+                    print('Crawler: Status code 429, adding back to queue', link)
                     self.link_queue.put((2, link))
                 else:
-                    print('CA: Crawler: Bad status code', sc, link)
+                    print('Crawler: Bad status code', sc, link)
                 self.link_queue.task_done()
                 continue
 
@@ -80,7 +83,7 @@ class Client:
 
             # Put any new images on the image queue:
             for image in results[1]:
-                print('CA: Crawler: Found an image', image)
+                print('Crawler: Found an image', image)
                 self.image_queue.put(image)
 
             self.link_queue.task_done()
@@ -93,13 +96,13 @@ class Client:
 
             # Download the image from a url on the queue:
             url = self.image_queue.get()
-            print('CA: Classifier: Downloading', url)
+            print('Classifier: Downloading', url)
             try:
                 image = requests.get(
                     url,
                     stream=True,
                     headers={
-                        'User-Agent': crawler.web.UA
+                        'User-Agent': UA
                     },
                     timeout=3,
                     auth=('user', 'pass')
@@ -108,34 +111,34 @@ class Client:
                 # 32 MB limit
                 try:
                     if int(image.headers['Content-Length']) > (1024 ** 2) * 32:
-                        print('CA: Classifier: Image too big', url)
+                        print('Classifier: Image too big', url)
                         continue
                 except IndexError:
                     pass
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-                print('CA: Classifier: Could not connect', url)
+                print('Classifier: Could not connect', url)
                 self.image_queue.task_done()
                 continue
 
             # Handle bad status codes
             if image.status_code != 200:
-                print('CA: Classifier: Bad status code', image.status_code, url)
+                print('Classifier: Bad status code', image.status_code, url)
                 self.image_queue.task_done()
                 continue
 
             # Classify the image:
-            results = classifier.classify(image.raw)
+            results = self.classify(image.raw)
             if results[0]:
-                print('CA: Classifier: Cat found', results[1], url)
+                print('Classifier: Cat found', results[1], url)
                 try:
                     self.server.imag(url)
-                except network.exceptions.SocketClosed:
-                    print('CA: Classifier: Error: Socket closed')
+                except netexcept.SocketClosed:
+                    print('Classifier: Error: Socket closed')
                     self.error_event.set()
                     sys.exit(1)
                 self.cats.add(url)
             else:
-                print('CA: Classifier: Not a cat', results[1], url)
+                print('Classifier: Not a cat', results[1], url)
 
             self.image_queue.task_done()
 
@@ -146,22 +149,22 @@ class Client:
 
             # Wait for the link queue to run out
             self.link_queue.join()
-            print('CA: Queuer: Requesting more URLs')
+            print('Queuer: Requesting more URLs')
 
             # Get URLs from the server
             urls = []
             try:
                 urls = self.server.urls()
-            except network.exceptions.InvalidUrlsPacketReceived:
-                print('CA: Queuer: Error: Invalid URLS packet received', results[1], url)
+            except netexcept.InvalidUrlsPacketReceived:
+                print('Queuer: Error: Invalid URLS packet received', results[1], url)
                 self.error_event.set()
                 sys.exit(1)
-            except network.exceptions.SocketClosed:
-                print('CA: Queuer: Error: Socket closed')
+            except netexcept.SocketClosed:
+                print('Queuer: Error: Socket closed')
                 self.error_event.set()
                 sys.exit(1)
    
-            print('CA: Queuer: New URLs:', urls)
+            print('Queuer: New URLs:', urls)
 
             # Add them to the queue
             for link in urls:

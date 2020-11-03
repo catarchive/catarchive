@@ -41,7 +41,7 @@ class Crawler:
 
         # Only follow HTML:
         try:
-            if self.page.response.headers['Content-Type'][0:10] != 'text/html;':
+            if self.page.response.headers['Content-Type'][0:9] != 'text/html':
                 return ([], [])
         except IndexError:
             return ([], [])

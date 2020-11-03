@@ -13,6 +13,8 @@ net, device, model, dset, optimizer, criterion = i.net, i.device, i.model, i.set
 # install model if its not isntalled
 if not model.installed:
     model.install()
+else:
+    print('Using custom model from', model.path)
 
 # set up the NN
 net.to(device)
