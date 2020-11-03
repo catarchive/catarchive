@@ -3,6 +3,7 @@
 import os 
 import torch
 import requests
+from .utils import device
 
 
 class ModelManager:
@@ -34,5 +35,5 @@ class ModelManager:
     def load(self):
         """ Load the model for the NN. """
 
-        return torch.load(self.path)
+        return torch.load(self.path, map_location=device)
 
