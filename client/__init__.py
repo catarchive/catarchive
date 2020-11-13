@@ -81,7 +81,7 @@ def main():
     with open('./cats.log', 'a+') as f:
         for cat in list(c.cats):
             f.write(str(cat) + '\n')
-        f.write(str(c.domain_priority))
+        f.write(str(c.domain_priority) + '\n')
 
     print('Wrote to cats.log')
     s.close()

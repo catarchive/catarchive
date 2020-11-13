@@ -49,11 +49,14 @@ class Client:
             base = 1000
         elif 'cat' in url:
             base = 749
+
         try:
             score = base + self.domain_priority[domain]
+            if self.domain_priority[domain] < 0:
+                self.domain_priority[domain] = 0
         except KeyError:
-            self.domain_priority[domain] = base - 24
-            score = base - 24
+            self.domain_priority[domain] = 0
+            score = base
 
         return score if score > 0 else 0
 
@@ -83,7 +86,7 @@ class Client:
                     try:
                         self.domain_priority[urlparse(link).netloc] += 100
                     except KeyError:
-                        self.domain_priority[urlparse(link).netloc] = self.calculate_priority(link) + 48
+                        self.domain_priority[urlparse(link).netloc] = 48
                     continue
 
                 # Page wasn't HTML:
@@ -100,9 +103,9 @@ class Client:
 
                     # Demote for bad status
                     try:
-                        self.domain_priority[urlparse(link).netloc] += 10
+                        self.domain_priority[urlparse(link).netloc] += 8
                     except KeyError:
-                        self.domain_priority[urlparse(link).netloc] = self.calculate_priority(link)
+                        self.domain_priority[urlparse(link).netloc] = 6
 
                     if sc == 429:
                         print('Crawler: Status code 429, adding back to queue', link)
@@ -117,7 +120,7 @@ class Client:
                     self.domain_priority[urlparse(link).netloc] += 4
                 except KeyError:
                     # emphasize new domains
-                    self.domain_priority[urlparse(link).netloc] = self.calculate_priority(link) - 24
+                    self.domain_priority[urlparse(link).netloc] = 0
 
                 # Put the new links on the queue (prioritize urls with 'cat' in them):
                 for new_link in results[0]:
