@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import sys
 import argparse
@@ -15,6 +13,8 @@ def main():
     parser.add_argument('-t', '--token', type=str, help='The authentication token of the server to connect to, or set the CAT_ARCHIVE_TOKEN environment variable', default='')
     parser.add_argument('-l', '--local', type=str, help='Set an initial URL and crawl without connecting to a server (mainly just for testing purposes)', default='')
     parser.add_argument('-c', '--custom', type=bool, help='Use the custom model or not (default False)', default=False)
+    parser.add_argument('-g', '--good-domains', type=str, help='A comma separated list of good domains, e.g. "www.reddit.com,www.animalplanet.com"', default=[])
+    parser.add_argument('-b', '--bad-domains', type=str, help='A comma separated list of bad domains', default=[])
     args = parser.parse_args()
 
     endpoint = ('', '0')
@@ -42,7 +42,7 @@ def main():
     # Instantiate client:
     # Import here for a faster --help
     from .client import Client
-    c = Client(s, args.custom)
+    c = Client(s, args.custom, args.good_domains, args.bad_domains)
 
     # Connect
     try:
@@ -78,11 +78,9 @@ def main():
     # Write found cats
     with open('./cats.log', 'a+') as f:
         for cat in list(c.cats):
-            f.write(cat + '\n')
+            f.write(str(cat) + '\n')
+        f.write(str(c.domain_priority))
 
     print('Wrote to cats.log')
     s.close()
     sys.exit(0)
-
-if __name__ == '__main__':
-    main()

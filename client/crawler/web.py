@@ -9,6 +9,7 @@ class Page:
 
     def __init__(self, url):
         self.url = urlparse(url)
+        self.path = self.url.path if self.url.path != '' else '/'
         self.raw_url = url
         self.links = []
         self.images = []
@@ -81,11 +82,11 @@ class Page:
             # Relative-directory links:
             # TODO: Better relative links (see https://kb.iu.edu/d/abwp).
             # Relative urls are dumb! Use absolute ones please.
-                if self.url.path[-1] != '/': return self.url.scheme + '://' + self.url.netloc + self.url.path + '/' + link
-                else: return self.url.scheme + '://' + self.url.netloc + self.url.path + link
+                if self.path[-1] != '/': return self.url.scheme + '://' + self.url.netloc + self.path + '/' + link
+                else: return self.url.scheme + '://' + self.url.netloc + self.path + link
             elif len(link) < 5:
-                if self.url.path[-1] != '/': return self.url.scheme + '://' + self.url.netloc + self.url.path + '/' + link
-                else: return self.url.scheme + '://' + self.url.netloc + self.url.path + link
+                if self.path[-1] != '/': return self.url.scheme + '://' + self.url.netloc + self.path + '/' + link
+                else: return self.url.scheme + '://' + self.url.netloc + self.path + link
             # The link is fine:
             else:
                 return link

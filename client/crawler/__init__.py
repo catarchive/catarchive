@@ -66,10 +66,12 @@ class Crawler:
         valid_images = []
         for image in self.page.images:
             if image not in self.local_images:
-                # We only care about jpegs.
-                if image.split('.')[-1] != 'jpg' and image.split('.')[-1] != 'jpeg':
+                # We only care about jpegs and gifs.
+                ext = image.split('.')[-1]
+                if ext != 'jpg' and ext != 'jpeg' and ext != 'gif':
                     if '?' in image:
-                        if image.split('.')[-1].split('?')[0] != 'jpg' and image.split('.')[-1].split('?')[0] != 'jpeg':
+                        ext = image.split('.')[-1].split('?')[0]
+                        if ext != 'jpg' and ext != 'jpeg' and ext != 'gif':
                             continue
                     elif len(image.split('/')[-1].split('.')) != 0:
                         continue
