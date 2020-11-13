@@ -52,8 +52,8 @@ class Client:
 
         try:
             score = base + self.domain_priority[domain]
-            if self.domain_priority[domain] < 0:
-                self.domain_priority[domain] = 0
+            if score < 0:
+                self.domain_priority[domain] = -base + 1
         except KeyError:
             self.domain_priority[domain] = 0
             score = base
