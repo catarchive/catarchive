@@ -42,9 +42,9 @@ class Client:
         domain = urlparse(url).netloc
 
         if domain in self.bad_domains:
-            base = 10000
+            base = 1250
         elif domain in self.good_domains:
-            base = 0
+            base = 50
         elif domain in self.crawler.tmr:
             base = 1000
         elif 'cat' in url:
