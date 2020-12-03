@@ -45,7 +45,7 @@ func handle(c protocol.Client) {
 			}
 
 			// Send the STRT packet
-			c.Strt()
+			err = c.Strt()
 			if err != nil {
 				util.Logger.Println("error sending STRT packet to client", c, err)
 				continue
@@ -55,7 +55,7 @@ func handle(c protocol.Client) {
 
 			// Send the response URLS packet
 			util.Logger.Println("client requested for URLs", c)
-			c.Urls()
+			err = c.Urls()
 			if err != nil {
 				util.Logger.Println("error sending URLS packet to client", c, err)
 				continue
