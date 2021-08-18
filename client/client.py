@@ -224,7 +224,7 @@ class Client:
                 self.image_queue.task_done()
 
             except Exception as e:
-                print('Classifier: EXCEPTION:', e)
+                print('Classifier: EXCEPTION:', e, 'url:', url)
                 continue
 
     def queuer_thread(self):
